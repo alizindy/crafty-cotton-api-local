@@ -36,26 +36,26 @@ $ yarn install
 
 ```bash
 # development
-$ yarn run
+$ yarn run start
 
 # watch mode
-$ yarn run:dev
+$ yarn run start:dev
 
 # production mode
-$ yarn run:prod
+$ yarn run start:prod
 ```
 
 ## Run tests
 
 ```bash
 # unit tests
-$ yarn test
+$ yarn run test
 
 # e2e tests
-$ yarn test:e2e
+$ yarn run test:e2e
 
 # test coverage
-$ yarn test:cov
+$ yarn run test:cov
 ```
 
 ## Resources
