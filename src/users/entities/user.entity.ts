@@ -35,7 +35,7 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   email: string;
 
   // @Transform((value) => {
@@ -45,7 +45,7 @@ export class User extends BaseEntity {
 
   //   return value;
   // })
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   password: string;
 
   @Column({

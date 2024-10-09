@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "target": "ES2021",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
@@ -19,10 +19,10 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    // "rootDir": "./",
     "paths": {
       "@/*": ["src/*"]
     }
   },
+  "include": ["src/**/*", "db"],
   "exclude": ["dist", "node_modules"]
 }
