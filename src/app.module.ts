@@ -2,19 +2,11 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { configService } from './config/config.service';
-import { ConfigModule } from '@nestjs/config';
+import { dataSourceOptions } from '../db/data-source';
+import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forRoot({
-      ...configService.getTypeOrmConfig(),
-      autoLoadEntities: true,
-    }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-  ],
+  imports: [TypeOrmModule.forRoot(dataSourceOptions), UsersModule],
   controllers: [AppController],
   providers: [AppService],
 })

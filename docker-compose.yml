@@ -10,8 +10,8 @@ services:
     image: crafty-cotton-api
     depends_on:
       - postgres
-    command: sh -c "${COMMAND}"
-    env_file: ${ENV_FILE}
+    command: sh -c "yarn start:dev"
+    env_file: .env.develop
     ports:
       - '10000:3000'
     networks:
