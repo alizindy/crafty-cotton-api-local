@@ -1,12 +1,16 @@
+import { Creator } from '@/creators/entities/creator.entity';
+import { Customer } from '@/customers/entities/customer.entity';
+import { Staff } from '@/staffs/entities/staff.entity';
 import {
   BaseEntity,
-  BeforeInsert,
   Column,
-  CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  OneToOne,
+  BeforeInsert,
   BeforeUpdate,
+  UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
 
 // import * as bcrypt from 'bcryptjs';
@@ -35,7 +39,7 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
+  @Column()
   email: string;
 
   // @Transform((value) => {
@@ -45,29 +49,34 @@ export class User extends BaseEntity {
 
   //   return value;
   // })
-  @Column({ nullable: true })
+  @Column()
   password: string;
 
   @Column({
     type: 'enum',
     enum: UserRole,
-    default: UserRole.STAFF,
   })
   role: UserRole;
 
   @Column({
     default: true,
-    nullable: false,
   })
-  status: boolean;
+  isActive: boolean;
 
-  @Column()
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => Staff, (staff) => staff.user)
+  staff: Staff;
+
+  @OneToOne(() => Creator, (creator) => creator.user)
+  creator: Creator;
+
+  @OneToOne(() => Customer, (customer) => customer.user)
+  customer: Customer;
 
   // @BeforeInsert()
   // async hashPassword() {
@@ -83,13 +92,17 @@ export class User extends BaseEntity {
   @BeforeInsert()
   createdAtWithTimezone() {
     const currentDate = new Date();
-    this.createdAt = new Date(currentDate.getTime());
-    this.updatedAt = new Date(currentDate.getTime());
+    const timeOffset = 7 * 60; // Offset for GMT+7 in minutes
+    const localTime = new Date(currentDate.getTime() + timeOffset * 60 * 1000);
+    this.createdAt = localTime;
+    this.updatedAt = localTime;
   }
 
   @BeforeUpdate()
   updatedAtWithTimezone() {
     const currentDate = new Date();
-    this.updatedAt = new Date(currentDate.getTime());
+    const timeOffset = 7 * 60; // Offset for GMT+7 in minutes
+    const localTime = new Date(currentDate.getTime() + timeOffset * 60 * 1000);
+    this.updatedAt = localTime;
   }
 }
