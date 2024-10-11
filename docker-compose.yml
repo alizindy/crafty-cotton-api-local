@@ -24,7 +24,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: crafty-cotton_api_development
+      POSTGRES_DB: cc_local_api
     networks:
       - crafty-cotton-api
   redis:
