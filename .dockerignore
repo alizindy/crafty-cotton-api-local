@@ -3,7 +3,7 @@ node_modules/
 dist/
 
 .DS_Store
-.env.local
-.env.develop
-.env.prod
-.env.staging
+# .env.local
+# .env.develop
+# .env.prod
+# .env.staging
