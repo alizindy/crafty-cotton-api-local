@@ -1,4 +1,5 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
+import { SnakeNamingStrategy } from './snake-naming.strategy';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -15,6 +16,7 @@ export const dataSourceOptions: DataSourceOptions = {
   logger: 'file',
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: [`dist/db/migrations/*.{ts,js}`],
+  namingStrategy: new SnakeNamingStrategy(),
 };
 
 const dataSource = new DataSource(dataSourceOptions);
