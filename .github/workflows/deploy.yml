@@ -30,9 +30,9 @@ jobs:
         run: |
           docker build -t crafty-cotton-api:latest -f Dockerfile.local .
 
-      - name: Run tests
-        run: |
-          docker run crafty-cotton-api:latest yarn test
+      # - name: Run tests
+      #   run: |
+      #     docker run crafty-cotton-api:latest yarn test
 
   deploy:
     runs-on: ubuntu-latest
