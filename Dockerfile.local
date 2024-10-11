@@ -1,0 +1,18 @@
+FROM node:20.18.0-alpine
+
+ARG GIT_COMMIT
+WORKDIR /usr/app
+
+RUN apk add --no-cache git
+COPY package.json ./
+COPY yarn.lock ./
+COPY .env ./
+RUN yarn install
+RUN yarn add @nestjs/axios
+RUN yarn add @nestjs/schedule
+COPY . .
+RUN yarn build
+
+EXPOSE 3000
+
+CMD ["node", "dist/main"]
