@@ -26,11 +26,9 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: Dockerfile.local
-          push: false
+        id: build_image
+        run: |
+          docker build -t crafty-cotton-api:latest -f Dockerfile.local .
 
       - name: Run tests
         run: |
