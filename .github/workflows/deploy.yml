@@ -44,6 +44,6 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /path/to/your/app  # Change this to the path where you want to deploy
+            cd /home/nadoo/app
             docker-compose down
             docker-compose up -d --build
