@@ -37,6 +37,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Copy project files to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ec2-52-221-234-42.ap-southeast-1.compute.amazonaws.com
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "."
+          target: "/home/ubuntu/app"  # Update to your target path on EC2
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
@@ -44,6 +53,6 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/app
+            cd /home/ubuntu/app  # Make sure this points to where docker-compose.yml is located
             docker-compose down
             docker-compose up -d --build
