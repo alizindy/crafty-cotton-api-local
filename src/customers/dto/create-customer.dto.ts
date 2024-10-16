@@ -1,30 +1,35 @@
+import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { User } from '@/users/entities/user.entity';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsOptional,
-  IsEmail,
   IsNotEmpty,
   Length,
   Matches,
 } from 'class-validator';
 
-export class CreateCustomerDto {
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
-
-  @IsString()
-  @IsNotEmpty()
-  password: string;
-
+export class CreateCustomerDto extends CreateUserDto {
+  @ApiProperty({
+    example: 'John',
+    description: 'First name of the customer',
+  })
   @IsString()
   @IsNotEmpty()
   firstName: string;
 
+  @ApiProperty({
+    example: 'Doe',
+    description: 'Last name of the customer',
+  })
   @IsString()
   @IsNotEmpty()
   lastName: string;
 
+  @ApiPropertyOptional({
+    example: '0912345678',
+    description: 'Phone number of the customer',
+  })
   @IsString()
   @IsOptional()
   @Length(9, 10) // Ensures the string length is between 9 and 10

@@ -1,36 +1,38 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { OmitType, PartialType } from '@nestjs/swagger';
 import { CreateCreatorDto } from './create-creator.dto';
 import { IsOptional, IsString } from 'class-validator';
 
-export class UpdateCreatorDto extends PartialType(CreateCreatorDto) {
-  @IsString()
+export class UpdateCreatorDto extends PartialType(
+  OmitType(CreateCreatorDto, ['email', 'password', 'slug'] as const),
+) {
   @IsOptional()
+  @IsString()
   firstName?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   lastName?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   displayName?: string;
 
   @IsOptional()
   bio?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   socialFacebook?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   socialInstagram?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   socialLinkedin?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   socialTwitter?: string;
 }

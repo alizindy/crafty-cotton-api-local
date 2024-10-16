@@ -1,74 +1,66 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DataSource } from 'typeorm';
+import { Customer } from './entities/customer.entity';
+import { UserRole } from '@/users/entities/user.entity';
+import { UsersService } from '@/users/users.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Customer } from './entities/customer.entity';
-import { Repository } from 'typeorm';
-import { User, UserRole } from '@/users/entities/user.entity';
 
 @Injectable()
 export class CustomersService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     @InjectRepository(Customer)
     private readonly customerRepository: Repository<Customer>,
+    private readonly dataSource: DataSource, // Inject DataSource for transactions
+    private readonly usersService: UsersService, // Inject UsersService to manage user creation
   ) {}
 
   async create(createCustomerDto: CreateCustomerDto) {
-    const { email, password, firstName, lastName, phoneNumber } =
-      createCustomerDto;
+    return this.dataSource.transaction(async (manager) => {
+      const { email, password, firstName, lastName, phoneNumber } =
+        createCustomerDto;
 
-    const userExisted: User = await this.userRepository.findOne({
-      where: {
-        role: UserRole.CUSTOMER,
-        email,
-      },
+      // Create the user within the transaction using UsersService
+      const userEntity = await this.usersService.createUserWithTransaction(
+        manager,
+        {
+          email,
+          password,
+        },
+        UserRole.CUSTOMER,
+      );
+
+      // Create the Customer entity linked to the created user
+      const customer = manager.create(Customer, {
+        firstName,
+        lastName,
+        phoneNumber: this.normalizedPhoneNumber(phoneNumber),
+        user: userEntity, // Link the user
+      });
+
+      // Save the customer within the same transaction
+      return manager.save(Customer, customer);
     });
-
-    if (userExisted) {
-      throw new Error('Email has been used');
-    }
-    // Hash the password (you might have a utility function for this)
-
-    // Create the User entity
-    const user = this.userRepository.create({
-      email,
-      password,
-      role: UserRole.CUSTOMER, // Set the role as Customer (assuming you have an enum or string for this)
-      isActive: true,
-    });
-
-    // Save the user to the database
-    const savedUser = await this.userRepository.save(user);
-
-    // Create the Customer entity with user_id linked to the created user
-    const customer = this.customerRepository.create({
-      firstName,
-      lastName,
-      phoneNumber: this.normalizedPhoneNumber(phoneNumber),
-      user: savedUser, // Link the user ID
-    });
-
-    // Save the customer to the database
-    return this.customerRepository.save(customer);
   }
 
-  findAll() {
+  async findAll(): Promise<Customer[]> {
     return this.customerRepository.find();
   }
 
-  findOne(id: number) {
+  async findOne(id: number): Promise<Customer> {
     return this.customerRepository.findOneBy({ id });
   }
 
-  async update(id: number, updateCustomerDto: UpdateCustomerDto) {
+  async update(
+    id: number,
+    updateCustomerDto: UpdateCustomerDto,
+  ): Promise<Customer> {
     const { firstName, lastName, phoneNumber } = updateCustomerDto;
 
     const customer = await this.findOne(id);
-
     if (!customer) {
-      throw new Error(`Customer member with ID ${id} not found`);
+      throw new Error(`Customer with ID ${id} not found`);
     }
 
     await this.customerRepository.update(id, {
@@ -84,7 +76,7 @@ export class CustomersService {
     return this.customerRepository.softDelete(id);
   }
 
-  normalizedPhoneNumber(tel: string) {
+  normalizedPhoneNumber(tel: string): string {
     let normalizedTel = tel;
 
     // Normalize phone number

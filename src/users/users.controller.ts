@@ -1,42 +1,73 @@
+// users.controller.ts
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
-  Delete,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
 
+@ApiTags('Users')
 @Controller('users')
+@UseInterceptors(ClassSerializerInterceptor) // Use this to automatically exclude fields like password
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
   @Get()
-  findAll() {
+  @ApiResponse({
+    status: 200,
+    description: 'Retrieved all users.',
+  })
+  async findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  @ApiResponse({
+    status: 200,
+    description: 'Retrieved user by ID.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found.',
+  })
+  async findOneById(@Param('id') id: number): Promise<User> {
+    return await this.usersService.findOneById(id).catch((err) => {
+      throw new HttpException(
+        {
+          message: err.message || 'Failed to retrieve user',
+        },
+        err.message === 'User not found'
+          ? HttpStatus.NOT_FOUND
+          : HttpStatus.BAD_REQUEST,
+      );
+    });
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
+  // @Delete(':id')
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'User deleted successfully.',
+  // })
+  // @ApiResponse({
+  //   status: 404,
+  //   description: 'User not found.',
+  // })
+  // async delete(@Param('id') id: number): Promise<void> {
+  //   return await this.usersService.deleteUser(id).catch((err) => {
+  //     throw new HttpException(
+  //       {
+  //         message: err.message || 'Failed to delete user',
+  //       },
+  //       err.message === 'User not found'
+  //         ? HttpStatus.NOT_FOUND
+  //         : HttpStatus.BAD_REQUEST,
+  //     );
+  //   });
+  // }
 }

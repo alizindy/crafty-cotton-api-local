@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Creator } from '@/creators/entities/creator.entity';
 import { Customer } from '@/customers/entities/customer.entity';
 import { Staff } from '@/staffs/entities/staff.entity';
@@ -8,20 +9,12 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   BeforeInsert,
-  BeforeUpdate,
   UpdateDateColumn,
   CreateDateColumn,
+  BeforeUpdate,
 } from 'typeorm';
-
-// import * as bcrypt from 'bcryptjs';
-
-// import { Merchant } from './merchant.entity';
-// import { Customer } from './customer.entity';
-// import { Admin } from './admin.entity';
-// import { ImageUpload } from './image-upload.entity';
-// import { OnBoardingStep, UserGender, UserStatus } from './enum/user.enum';
-// import { OmniauthIdentity } from './omniauth-identity.entity';
-// import { Transform } from 'class-transformer';
+import * as bcrypt from 'bcryptjs';
+import { Exclude, Transform } from 'class-transformer';
 
 export enum UserRole {
   STAFF = 'staff',
@@ -36,58 +29,73 @@ export class User extends BaseEntity {
     Object.assign(this, partial);
   }
 
+  @ApiProperty({ example: 1, description: 'Unique identifier of the user' })
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ApiProperty({
+    example: 'user@example.com',
+    description: 'Email address of the user',
+  })
   @Column()
   email: string;
 
-  // @Transform((value) => {
-  //   if (value && typeof value === 'string') {
-  //     return bcrypt.hash(value, 8);
-  //   }
-
-  //   return value;
-  // })
+  @Exclude()
+  @ApiProperty({ description: 'Hashed password of the user' })
   @Column()
   password: string;
 
+  @ApiProperty({ example: UserRole.STAFF, description: 'Role of the user' })
   @Column({
     type: 'enum',
     enum: UserRole,
   })
   role: UserRole;
 
-  @Column({
-    default: true,
+  @ApiProperty({
+    example: true,
+    description: 'Indicates if the user is active',
   })
+  @Column({ default: true })
   isActive: boolean;
 
+  @ApiProperty({ description: 'Creation date of the user' })
   @CreateDateColumn()
+  @Transform(({ value }) => new Date(value.getTime() + 7 * 60 * 60 * 1000))
   createdAt: Date;
 
+  @ApiProperty({ description: 'Last update date of the user' })
   @UpdateDateColumn()
+  @Transform(({ value }) => new Date(value.getTime() + 7 * 60 * 60 * 1000))
   updatedAt: Date;
 
+  @ApiPropertyOptional({
+    type: () => Staff,
+    description: 'Staff profile associated with the user',
+  })
   @OneToOne(() => Staff, (staff) => staff.user)
   staff: Staff;
 
+  @ApiPropertyOptional({
+    type: () => Creator,
+    description: 'Creator profile associated with the user',
+  })
   @OneToOne(() => Creator, (creator) => creator.user)
   creator: Creator;
 
+  @ApiPropertyOptional({
+    type: () => Customer,
+    description: 'Customer profile associated with the user',
+  })
   @OneToOne(() => Customer, (customer) => customer.user)
   customer: Customer;
 
-  // @BeforeInsert()
-  // async hashPassword() {
-  //   if (this.password) {
-  //     this.password = await bcrypt.hash(this.password, 8);
-  //   }
-  // }
-
-  // async validatePassword(password: string): Promise<boolean> {
-  //   return bcrypt.compare(password, this.password);
-  // }
+  @BeforeInsert()
+  async hashPassword() {
+    if (this.password) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
+  }
 
   @BeforeInsert()
   createdAtWithTimezone() {
