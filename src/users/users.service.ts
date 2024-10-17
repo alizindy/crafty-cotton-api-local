@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -26,9 +27,11 @@ export class UsersService {
       throw new Error('Email has been used');
     }
 
+    const hashedPassword = await this.hashPassword(password);
+
     const user = manager.create(User, {
       email,
-      password,
+      password: hashedPassword,
       role,
       isActive: true,
     });
@@ -53,8 +56,23 @@ export class UsersService {
     return user;
   }
 
-  // async deleteUser(id: number): Promise<void> {
-  //   const user = await this.findOneById(id); // This will throw NotFoundException if user doesn't exist
-  //   await this.userRepository.softDelete(user.id);
-  // }
+  async findByEmail(email: string): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { email } });
+  }
+
+  async deleteUser(id: number): Promise<void> {
+    const user = await this.findOneById(id); // This will throw NotFoundException if user doesn't exist
+    await this.userRepository.softDelete(user.id);
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 10); // Define the salt rounds in a config if needed
+  }
+
+  async validatePassword(
+    inputPassword: string,
+    storedPassword: string,
+  ): Promise<boolean> {
+    return bcrypt.compare(inputPassword, storedPassword);
+  }
 }

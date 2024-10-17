@@ -2,19 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Creator } from '@/creators/entities/creator.entity';
 import { Customer } from '@/customers/entities/customer.entity';
 import { Staff } from '@/staffs/entities/staff.entity';
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  OneToOne,
-  BeforeInsert,
-  UpdateDateColumn,
-  CreateDateColumn,
-  BeforeUpdate,
-} from 'typeorm';
-import * as bcrypt from 'bcryptjs';
-import { Exclude, Transform } from 'class-transformer';
+import { Column, Entity, OneToOne } from 'typeorm';
+import { Exclude } from 'class-transformer';
+import { AppBaseEntity } from '@/common/entities/app-base.entity';
 
 export enum UserRole {
   STAFF = 'staff',
@@ -23,15 +13,11 @@ export enum UserRole {
 }
 
 @Entity()
-export class User extends BaseEntity {
+export class User extends AppBaseEntity {
   constructor(partial: Partial<User>) {
     super();
     Object.assign(this, partial);
   }
-
-  @ApiProperty({ example: 1, description: 'Unique identifier of the user' })
-  @PrimaryGeneratedColumn()
-  id: number;
 
   @ApiProperty({
     example: 'user@example.com',
@@ -59,16 +45,6 @@ export class User extends BaseEntity {
   @Column({ default: true })
   isActive: boolean;
 
-  @ApiProperty({ description: 'Creation date of the user' })
-  @CreateDateColumn()
-  @Transform(({ value }) => new Date(value.getTime() + 7 * 60 * 60 * 1000))
-  createdAt: Date;
-
-  @ApiProperty({ description: 'Last update date of the user' })
-  @UpdateDateColumn()
-  @Transform(({ value }) => new Date(value.getTime() + 7 * 60 * 60 * 1000))
-  updatedAt: Date;
-
   @ApiPropertyOptional({
     type: () => Staff,
     description: 'Staff profile associated with the user',
@@ -89,28 +65,4 @@ export class User extends BaseEntity {
   })
   @OneToOne(() => Customer, (customer) => customer.user)
   customer: Customer;
-
-  @BeforeInsert()
-  async hashPassword() {
-    if (this.password) {
-      this.password = await bcrypt.hash(this.password, 10);
-    }
-  }
-
-  @BeforeInsert()
-  createdAtWithTimezone() {
-    const currentDate = new Date();
-    const timeOffset = 7 * 60; // Offset for GMT+7 in minutes
-    const localTime = new Date(currentDate.getTime() + timeOffset * 60 * 1000);
-    this.createdAt = localTime;
-    this.updatedAt = localTime;
-  }
-
-  @BeforeUpdate()
-  updatedAtWithTimezone() {
-    const currentDate = new Date();
-    const timeOffset = 7 * 60; // Offset for GMT+7 in minutes
-    const localTime = new Date(currentDate.getTime() + timeOffset * 60 * 1000);
-    this.updatedAt = localTime;
-  }
 }

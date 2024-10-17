@@ -17,15 +17,19 @@ import {
   ApiCreatedResponse,
   ApiResponse,
   ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Customer } from './entities/customer.entity';
 
 @ApiTags('Customer')
+@ApiBearerAuth('JWT')
 @Controller('customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a new customer' })
   @ApiCreatedResponse({
     description: 'Creates a new customer and associated user',
   })
@@ -44,39 +48,33 @@ export class CustomersController {
   }
 
   @Get()
-  @ApiResponse({
-    status: 200,
-    description: 'Retrieves all customers',
-  })
+  @ApiOperation({ summary: 'Retrieve all customers' })
+  @ApiResponse({ status: 200, description: 'Retrieves all customers' })
   async findAll(): Promise<Customer[]> {
     return this.customersService.findAll();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Retrieve a customer by ID' })
   @ApiResponse({
     status: 200,
     description: 'Retrieves a specific customer by ID',
   })
-  @ApiResponse({
-    status: 404,
-    description: 'Customer not found',
-  })
+  @ApiResponse({ status: 404, description: 'Customer not found' })
   async findOne(@Param('id') id: string): Promise<Customer> {
-    const Customer = await this.customersService.findOne(+id);
-    if (!Customer) {
+    const customer = await this.customersService.findOne(+id);
+    if (!customer) {
       throw new HttpException(
         { message: 'Customer not found' },
         HttpStatus.NOT_FOUND,
       );
     }
-    return Customer;
+    return customer;
   }
 
   @Patch(':id')
-  @ApiResponse({
-    status: 200,
-    description: 'Updates a specific customer',
-  })
+  @ApiOperation({ summary: 'Update a customer by ID' })
+  @ApiResponse({ status: 200, description: 'Updates a specific customer' })
   @ApiBody({ type: UpdateCustomerDto })
   async update(
     @Param('id') id: string,
@@ -93,19 +91,14 @@ export class CustomersController {
   }
 
   @Delete(':id')
-  @ApiResponse({
-    status: 200,
-    description: 'Deletes a specific Customer member',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Customer member not found',
-  })
+  @ApiOperation({ summary: 'Delete a customer by ID' })
+  @ApiResponse({ status: 200, description: 'Deletes a specific customer' })
+  @ApiResponse({ status: 404, description: 'Customer not found' })
   async delete(@Param('id') id: string): Promise<void> {
     const result = await this.customersService.delete(+id);
     if (!result.affected) {
       throw new HttpException(
-        { message: 'Customer member not found' },
+        { message: 'Customer not found' },
         HttpStatus.NOT_FOUND,
       );
     }
