@@ -10,9 +10,14 @@ async function bootstrap() {
     .setTitle('Crafty Cotton Document API')
     .setDescription('API Doc V1')
     .setVersion('1.0')
-    .addApiKey({ type: 'apiKey', name: 'X-API-KEY', in: 'header' }, 'X-API-KEY')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'JWT',
+    )
+
     .build();
   const documentApi = SwaggerModule.createDocument(app, config, {});
+
   SwaggerModule.setup('api/doc', app, documentApi);
   app.useGlobalPipes(
     new ValidationPipe({
@@ -20,6 +25,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+  // Apply JwtAuthGuard globally
   await app.listen(3000);
 }
 bootstrap();
