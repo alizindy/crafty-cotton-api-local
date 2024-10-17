@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '@/users/entities/user.entity';
 import {
   BaseEntity,
@@ -20,27 +21,41 @@ export class Customer extends BaseEntity {
     Object.assign(this, partial);
   }
 
+  @ApiProperty({ example: 1, description: 'Unique identifier of the customer' })
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ApiProperty({ example: 'Jane', description: 'First name of the customer' })
   @Column()
   firstName: string;
 
+  @ApiProperty({ example: 'Doe', description: 'Last name of the customer' })
   @Column()
   lastName: string;
 
+  @ApiPropertyOptional({
+    example: '0912345678',
+    description: 'Phone number of the customer',
+  })
   @Column({ nullable: true })
   phoneNumber: string;
 
+  @ApiProperty({ description: 'Creation date of the customer' })
   @CreateDateColumn()
   createdAt: Date;
 
+  @ApiProperty({ description: 'Last update date of the customer' })
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @ApiPropertyOptional({ description: 'Deletion date of the customer' })
   @DeleteDateColumn()
   deletedAt: Date;
 
+  @ApiPropertyOptional({
+    type: () => User,
+    description: 'User profile associated with the customer',
+  })
   @OneToOne(() => User, (user) => user.customer)
   @JoinColumn()
   user: User;

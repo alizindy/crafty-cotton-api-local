@@ -1,58 +1,48 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DataSource } from 'typeorm';
+import { Staff } from './entities/staff.entity';
+import { UserRole } from '@/users/entities/user.entity';
+import { UsersService } from '@/users/users.service';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Staff } from './entities/staff.entity';
-import { Repository } from 'typeorm';
-import { User, UserRole } from '@/users/entities/user.entity';
 
 @Injectable()
 export class StaffsService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     @InjectRepository(Staff)
     private readonly staffRepository: Repository<Staff>,
+    private readonly dataSource: DataSource, // Inject DataSource for transactions
+    private readonly usersService: UsersService, // Inject UsersService to manage user creation
   ) {}
 
   async create(createStaffDto: CreateStaffDto) {
-    const { email, password, firstName, lastName, job, department } =
-      createStaffDto;
+    return this.dataSource.transaction(async (manager) => {
+      const { email, password, firstName, lastName, job, department } =
+        createStaffDto;
 
-    const userExisted: User = await this.userRepository.findOne({
-      where: {
-        role: UserRole.STAFF,
-        email,
-      },
+      // Create the user within the transaction using UsersService
+      const userEntity = await this.usersService.createUserWithTransaction(
+        manager,
+        {
+          email,
+          password,
+        },
+        UserRole.STAFF,
+      );
+
+      // Create the Staff entity linked to the created user
+      const staff = manager.create(Staff, {
+        firstName,
+        lastName,
+        job,
+        department,
+        user: userEntity, // Link the user
+      });
+
+      // Save the staff within the same transaction
+      return manager.save(Staff, staff);
     });
-
-    if (userExisted) {
-      throw new Error('Email has been used');
-    }
-    // Hash the password (you might have a utility function for this)
-
-    // Create the User entity
-    const user = this.userRepository.create({
-      email,
-      password,
-      role: UserRole.STAFF, // Set the role as Staff (assuming you have an enum or string for this)
-      isActive: true,
-    });
-
-    // Save the user to the database
-    const savedUser = await this.userRepository.save(user);
-
-    // Create the Staff entity with user_id linked to the created user
-    const staff = this.staffRepository.create({
-      firstName,
-      lastName,
-      job,
-      department,
-      user: savedUser, // Link the user ID
-    });
-
-    // Save the staff to the database
-    return this.staffRepository.save(staff);
   }
 
   findAll() {
@@ -67,7 +57,6 @@ export class StaffsService {
     const { firstName, lastName, job, department } = updateStaffDto;
 
     const staff = await this.findOne(id);
-
     if (!staff) {
       throw new Error(`Staff member with ID ${id} not found`);
     }
