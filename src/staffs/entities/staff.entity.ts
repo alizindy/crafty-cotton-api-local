@@ -1,33 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '@/users/entities/user.entity';
-import { Transform } from 'class-transformer';
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  OneToOne,
-  JoinColumn,
-  DeleteDateColumn,
-  UpdateDateColumn,
-  CreateDateColumn,
-  BeforeInsert,
-  BeforeUpdate,
-} from 'typeorm';
+import { Column, Entity, OneToOne, JoinColumn } from 'typeorm';
+import { AppBaseEntity } from '@/common/entities/app-base.entity';
 
 @Entity()
-export class Staff extends BaseEntity {
+export class Staff extends AppBaseEntity {
   constructor(partial: Partial<Staff>) {
     super();
     Object.assign(this, partial);
   }
-
-  @ApiProperty({
-    example: 1,
-    description: 'Unique identifier of the staff member',
-  })
-  @PrimaryGeneratedColumn()
-  id: number;
 
   @ApiProperty({
     example: 'John',
@@ -54,21 +35,6 @@ export class Staff extends BaseEntity {
   @Column({ nullable: true })
   department: string;
 
-  @ApiProperty({ description: 'Creation date of the staff member' })
-  @CreateDateColumn()
-  @Transform(({ value }) => new Date(value.getTime() + 7 * 60 * 60 * 1000))
-  createdAt: Date;
-
-  @ApiProperty({ description: 'Last update date of the staff member' })
-  @UpdateDateColumn()
-  @Transform(({ value }) => new Date(value.getTime() + 7 * 60 * 60 * 1000))
-  updatedAt: Date;
-
-  @ApiPropertyOptional({ description: 'Deletion date of the staff member' })
-  @DeleteDateColumn()
-  @Transform(({ value }) => new Date(value.getTime() + 7 * 60 * 60 * 1000))
-  deletedAt: Date;
-
   @ApiPropertyOptional({
     type: () => User,
     description: 'User profile associated with the staff member',
@@ -76,21 +42,4 @@ export class Staff extends BaseEntity {
   @OneToOne(() => User, (user) => user.staff)
   @JoinColumn()
   user: User;
-
-  @BeforeInsert()
-  createdAtWithTimezone() {
-    const currentDate = new Date();
-    const timeOffset = 7 * 60; // Offset for GMT+7 in minutes
-    const localTime = new Date(currentDate.getTime() + timeOffset * 60 * 1000);
-    this.createdAt = localTime;
-    this.updatedAt = localTime;
-  }
-
-  @BeforeUpdate()
-  updatedAtWithTimezone() {
-    const currentDate = new Date();
-    const timeOffset = 7 * 60; // Offset for GMT+7 in minutes
-    const localTime = new Date(currentDate.getTime() + timeOffset * 60 * 1000);
-    this.updatedAt = localTime;
-  }
 }
