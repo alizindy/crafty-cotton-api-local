@@ -21,6 +21,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Customer } from './entities/customer.entity';
+import { UpdateResult } from 'typeorm';
 
 @ApiTags('Customer')
 @ApiBearerAuth('JWT')
@@ -37,14 +38,14 @@ export class CustomersController {
   async create(
     @Body() createCustomerDto: CreateCustomerDto,
   ): Promise<Customer> {
-    try {
-      return await this.customersService.create(createCustomerDto);
-    } catch (err) {
-      throw new HttpException(
-        { message: err.message || 'Failed to create customer' },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return await this.customersService
+      .create(createCustomerDto)
+      .catch((err) => {
+        throw new HttpException(
+          { message: err.message || 'Failed to create customer' },
+          HttpStatus.BAD_REQUEST,
+        );
+      });
   }
 
   @Get()
@@ -61,15 +62,13 @@ export class CustomersController {
     description: 'Retrieves a specific customer by ID',
   })
   @ApiResponse({ status: 404, description: 'Customer not found' })
-  async findOne(@Param('id') id: string): Promise<Customer> {
-    const customer = await this.customersService.findOne(+id);
-    if (!customer) {
+  async findOne(@Param('id') id: number): Promise<Customer> {
+    return await this.customersService.findOne(+id).catch((err) => {
       throw new HttpException(
-        { message: 'Customer not found' },
-        HttpStatus.NOT_FOUND,
+        { message: err.message || 'Customer not found' },
+        HttpStatus.BAD_REQUEST,
       );
-    }
-    return customer;
+    });
   }
 
   @Patch(':id')
@@ -77,30 +76,31 @@ export class CustomersController {
   @ApiResponse({ status: 200, description: 'Updates a specific customer' })
   @ApiBody({ type: UpdateCustomerDto })
   async update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ): Promise<Customer> {
-    try {
-      return await this.customersService.update(+id, updateCustomerDto);
-    } catch (err) {
-      throw new HttpException(
-        { message: err.message || 'Failed to update customer' },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return await this.customersService
+      .update(+id, updateCustomerDto)
+      .catch((err) => {
+        throw new HttpException(
+          { message: err.message || 'Failed to update customer' },
+          HttpStatus.BAD_REQUEST,
+        );
+      });
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a customer by ID' })
   @ApiResponse({ status: 200, description: 'Deletes a specific customer' })
   @ApiResponse({ status: 404, description: 'Customer not found' })
-  async delete(@Param('id') id: string): Promise<void> {
-    const result = await this.customersService.delete(+id);
-    if (!result.affected) {
+  async delete(@Param('id') id: number): Promise<UpdateResult> {
+    return await this.customersService.delete(id).catch((err) => {
       throw new HttpException(
-        { message: 'Customer not found' },
-        HttpStatus.NOT_FOUND,
+        { message: err.message || 'Failed to delete customer' },
+        err.message === 'Customer not found'
+          ? HttpStatus.NOT_FOUND
+          : HttpStatus.BAD_REQUEST,
       );
-    }
+    });
   }
 }

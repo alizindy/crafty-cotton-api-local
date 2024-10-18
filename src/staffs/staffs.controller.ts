@@ -21,6 +21,8 @@ import {
 import { StaffsService } from './staffs.service';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
+import { Staff } from './entities/staff.entity';
+import { UpdateResult } from 'typeorm';
 
 @ApiTags('Staff')
 @ApiBearerAuth('JWT')
@@ -35,14 +37,12 @@ export class StaffsController {
   })
   @ApiBody({ type: CreateStaffDto })
   async create(@Body() createStaffDto: CreateStaffDto) {
-    try {
-      return await this.staffsService.create(createStaffDto);
-    } catch (err) {
+    return await this.staffsService.create(createStaffDto).catch((err) => {
       throw new HttpException(
         { message: err.message || 'Failed to create staff member' },
         HttpStatus.BAD_REQUEST,
       );
-    }
+    });
   }
 
   @Get()
@@ -51,7 +51,7 @@ export class StaffsController {
     status: 200,
     description: 'Retrieves all staff members',
   })
-  async findAll() {
+  async findAll(): Promise<Staff[]> {
     return this.staffsService.findAll();
   }
 
@@ -65,15 +65,13 @@ export class StaffsController {
     status: 404,
     description: 'Staff member not found',
   })
-  async findOne(@Param('id') id: string) {
-    const staff = await this.staffsService.findOne(+id);
-    if (!staff) {
+  async findOne(@Param('id') id: string): Promise<Staff> {
+    return await this.staffsService.findOne(+id).catch((err) => {
       throw new HttpException(
-        { message: 'Staff member not found' },
-        HttpStatus.NOT_FOUND,
+        { message: err.message || 'Staff member not found' },
+        HttpStatus.BAD_REQUEST,
       );
-    }
-    return staff;
+    });
   }
 
   @Patch(':id')
@@ -90,15 +88,13 @@ export class StaffsController {
   async update(
     @Param('id') id: string,
     @Body() updateStaffDto: UpdateStaffDto,
-  ) {
-    try {
-      return await this.staffsService.update(+id, updateStaffDto);
-    } catch (err) {
+  ): Promise<Staff> {
+    return await this.staffsService.update(+id, updateStaffDto).catch((err) => {
       throw new HttpException(
         { message: err.message || 'Failed to update staff member' },
         HttpStatus.BAD_REQUEST,
       );
-    }
+    });
   }
 
   @Delete(':id')
@@ -111,13 +107,14 @@ export class StaffsController {
     status: 404,
     description: 'Staff member not found',
   })
-  async delete(@Param('id') id: string): Promise<void> {
-    const result = await this.staffsService.delete(+id);
-    if (!result.affected) {
+  async delete(@Param('id') id: number): Promise<UpdateResult> {
+    return await this.staffsService.delete(id).catch((err) => {
       throw new HttpException(
-        { message: 'Staff member not found' },
-        HttpStatus.NOT_FOUND,
+        { message: err.message || 'Failed to delete staff' },
+        err.message === 'Staff not found'
+          ? HttpStatus.NOT_FOUND
+          : HttpStatus.BAD_REQUEST,
       );
-    }
+    });
   }
 }

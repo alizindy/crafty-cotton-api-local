@@ -16,6 +16,7 @@ import {
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
+import { UpdateResult } from 'typeorm';
 
 @ApiTags('Users')
 @ApiBearerAuth('JWT')
@@ -50,7 +51,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Delete a user by ID' })
   @ApiResponse({ status: 200, description: 'User deleted successfully.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  async delete(@Param('id') id: number): Promise<void> {
+  async delete(@Param('id') id: number): Promise<UpdateResult> {
     return await this.usersService.deleteUser(id).catch((err) => {
       throw new HttpException(
         { message: err.message || 'Failed to delete user' },

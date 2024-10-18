@@ -25,10 +25,6 @@ export class Customer extends AppBaseEntity {
   @Column({ nullable: true })
   phoneNumber: string;
 
-  @ApiPropertyOptional({
-    type: () => User,
-    description: 'User profile associated with the customer',
-  })
   @OneToOne(() => User, (user) => user.customer)
   @JoinColumn()
   user: User;

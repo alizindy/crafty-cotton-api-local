@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Creator } from '@/creators/entities/creator.entity';
 import { Customer } from '@/customers/entities/customer.entity';
 import { Staff } from '@/staffs/entities/staff.entity';
@@ -45,24 +45,12 @@ export class User extends AppBaseEntity {
   @Column({ default: true })
   isActive: boolean;
 
-  @ApiPropertyOptional({
-    type: () => Staff,
-    description: 'Staff profile associated with the user',
-  })
   @OneToOne(() => Staff, (staff) => staff.user)
   staff: Staff;
 
-  @ApiPropertyOptional({
-    type: () => Creator,
-    description: 'Creator profile associated with the user',
-  })
   @OneToOne(() => Creator, (creator) => creator.user)
   creator: Creator;
 
-  @ApiPropertyOptional({
-    type: () => Customer,
-    description: 'Customer profile associated with the user',
-  })
   @OneToOne(() => Customer, (customer) => customer.user)
   customer: Customer;
 }
