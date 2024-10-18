@@ -3,8 +3,8 @@ import { IsNotEmpty, IsString } from "class-validator";
 
 export class CreateVariantTypeDto {
     @ApiProperty({
-        example: 'Manager',
-        description: 'The name of the staff role',
+        example: 'Color',
+        description: 'The name of the variant type',
     })
     @IsString()
     @IsNotEmpty()
