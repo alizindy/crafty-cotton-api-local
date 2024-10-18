@@ -1,7 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '@/users/entities/user.entity';
-import { Column, Entity, OneToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
 import { AppBaseEntity } from '@/common/entities/app-base.entity';
+import { StaffRole } from '@/staff-roles/entities/staff-role.entity';
 
 @Entity()
 export class Staff extends AppBaseEntity {
@@ -35,11 +36,12 @@ export class Staff extends AppBaseEntity {
   @Column({ nullable: true })
   department: string;
 
-  @ApiPropertyOptional({
-    type: () => User,
-    description: 'User profile associated with the staff member',
-  })
   @OneToOne(() => User, (user) => user.staff)
   @JoinColumn()
   user: User;
+
+  @ManyToOne(() => StaffRole, (staffRole) => staffRole.staffs, {
+    nullable: true,
+  })
+  staffRole: StaffRole;
 }

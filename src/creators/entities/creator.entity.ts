@@ -64,16 +64,12 @@ export class Creator extends AppBaseEntity {
   @Column({ nullable: true })
   socialTwitter: string;
 
-  @ApiPropertyOptional({
-    type: () => User,
-    description: 'User profile associated with the creator',
-  })
   @OneToOne(() => User, (user) => user.creator)
   @JoinColumn()
   user: User;
 
   @BeforeInsert()
   normalizeSlug() {
-    this.slug = this.slug.toLowerCase();
+    this.slug = this.slug.toLowerCase().replace(/\s+/g, '-');
   }
 }

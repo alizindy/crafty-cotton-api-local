@@ -21,6 +21,7 @@ import { CreatorsService } from './creators.service';
 import { CreateCreatorDto } from './dto/create-creator.dto';
 import { UpdateCreatorDto } from './dto/update-creator.dto';
 import { Creator } from './entities/creator.entity';
+import { UpdateResult } from 'typeorm';
 
 @ApiTags('Creator')
 @ApiBearerAuth('JWT')
@@ -35,14 +36,12 @@ export class CreatorsController {
   })
   @ApiBody({ type: CreateCreatorDto })
   async create(@Body() createCreatorDto: CreateCreatorDto): Promise<Creator> {
-    try {
-      return await this.creatorsService.create(createCreatorDto);
-    } catch (err) {
+    return await this.creatorsService.create(createCreatorDto).catch((err) => {
       throw new HttpException(
         { message: err.message || 'Failed to create creator' },
         HttpStatus.BAD_REQUEST,
       );
-    }
+    });
   }
 
   @Get()
@@ -59,15 +58,13 @@ export class CreatorsController {
     description: 'Retrieves a specific creator by ID',
   })
   @ApiResponse({ status: 404, description: 'Creator not found' })
-  async findOne(@Param('id') id: string): Promise<Creator> {
-    const creator = await this.creatorsService.findOne(+id);
-    if (!creator) {
+  async findOne(@Param('id') id: number): Promise<Creator> {
+    return await this.creatorsService.findOne(+id).catch((err) => {
       throw new HttpException(
-        { message: 'Creator not found' },
-        HttpStatus.NOT_FOUND,
+        { message: err.message || 'Creator not found' },
+        HttpStatus.BAD_REQUEST,
       );
-    }
-    return creator;
+    });
   }
 
   @Patch(':id')
@@ -75,30 +72,31 @@ export class CreatorsController {
   @ApiResponse({ status: 200, description: 'Updates a specific creator' })
   @ApiBody({ type: UpdateCreatorDto })
   async update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateCreatorDto: UpdateCreatorDto,
   ): Promise<Creator> {
-    try {
-      return await this.creatorsService.update(+id, updateCreatorDto);
-    } catch (err) {
-      throw new HttpException(
-        { message: err.message || 'Failed to update creator' },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return await this.creatorsService
+      .update(+id, updateCreatorDto)
+      .catch((err) => {
+        throw new HttpException(
+          { message: err.message || 'Failed to update creator' },
+          HttpStatus.BAD_REQUEST,
+        );
+      });
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a creator by ID' })
   @ApiResponse({ status: 200, description: 'Deletes a specific creator' })
   @ApiResponse({ status: 404, description: 'Creator not found' })
-  async delete(@Param('id') id: string): Promise<void> {
-    const result = await this.creatorsService.delete(+id);
-    if (!result.affected) {
+  async delete(@Param('id') id: number): Promise<UpdateResult> {
+    return await this.creatorsService.delete(id).catch((err) => {
       throw new HttpException(
-        { message: 'Creator not found' },
-        HttpStatus.NOT_FOUND,
+        { message: err.message || 'Failed to delete creator' },
+        err.message === 'Creator not found'
+          ? HttpStatus.NOT_FOUND
+          : HttpStatus.BAD_REQUEST,
       );
-    }
+    });
   }
 }

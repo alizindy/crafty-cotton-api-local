@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, EntityManager } from 'typeorm';
+import { Repository, EntityManager, UpdateResult } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
@@ -60,9 +60,8 @@ export class UsersService {
     return this.userRepository.findOne({ where: { email } });
   }
 
-  async deleteUser(id: number): Promise<void> {
-    const user = await this.findOneById(id); // This will throw NotFoundException if user doesn't exist
-    await this.userRepository.softDelete(user.id);
+  async deleteUser(id: number): Promise<UpdateResult> {
+    return await this.userRepository.softDelete(id);
   }
 
   async hashPassword(password: string): Promise<string> {

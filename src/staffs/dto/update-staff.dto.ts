@@ -41,4 +41,7 @@ export class UpdateStaffDto extends PartialType(
   @IsOptional()
   @IsString()
   department?: string;
+
+  @IsOptional()
+  staffRoleId?: number;
 }

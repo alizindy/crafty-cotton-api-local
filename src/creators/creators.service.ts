@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, UpdateResult } from 'typeorm';
 import { Creator } from './entities/creator.entity';
 import { UserRole } from '@/users/entities/user.entity';
 import { UsersService } from '@/users/users.service';
@@ -74,44 +74,25 @@ export class CreatorsService {
   }
 
   async findOne(id: number): Promise<Creator> {
-    return this.creatorRepository.findOneBy({ id });
+    const creator = await this.creatorRepository.findOne({ where: { id } });
+    if (!creator) {
+      throw new Error(`Creator with ID ${id} not found`);
+    }
+    return creator;
   }
 
   async update(
     id: number,
     updateCreatorDto: UpdateCreatorDto,
   ): Promise<Creator> {
-    const {
-      firstName,
-      lastName,
-      displayName,
-      bio,
-      socialFacebook,
-      socialInstagram,
-      socialLinkedin,
-      socialTwitter,
-    } = updateCreatorDto;
-
     const creator = await this.findOne(id);
-    if (!creator) {
-      throw new Error(`Creator with ID ${id} not found`);
-    }
 
-    await this.creatorRepository.update(id, {
-      firstName,
-      lastName,
-      displayName,
-      bio,
-      socialFacebook,
-      socialInstagram,
-      socialLinkedin,
-      socialTwitter,
-    });
+    Object.assign(creator, updateCreatorDto);
 
-    return this.findOne(id);
+    return this.creatorRepository.save(creator);
   }
 
-  async delete(id: number) {
+  async delete(id: number): Promise<UpdateResult> {
     return this.creatorRepository.softDelete(id);
   }
 }

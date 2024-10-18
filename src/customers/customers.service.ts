@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, UpdateResult } from 'typeorm';
 import { Customer } from './entities/customer.entity';
 import { UserRole } from '@/users/entities/user.entity';
 import { UsersService } from '@/users/users.service';
@@ -49,30 +49,25 @@ export class CustomersService {
   }
 
   async findOne(id: number): Promise<Customer> {
-    return this.customerRepository.findOneBy({ id });
+    const customer = await this.customerRepository.findOne({ where: { id } });
+    if (!customer) {
+      throw new Error(`Customer with ID ${id} not found`);
+    }
+    return customer;
   }
 
   async update(
     id: number,
     updateCustomerDto: UpdateCustomerDto,
   ): Promise<Customer> {
-    const { firstName, lastName, phoneNumber } = updateCustomerDto;
-
     const customer = await this.findOne(id);
-    if (!customer) {
-      throw new Error(`Customer with ID ${id} not found`);
-    }
 
-    await this.customerRepository.update(id, {
-      firstName,
-      lastName,
-      phoneNumber: this.normalizedPhoneNumber(phoneNumber),
-    });
+    Object.assign(customer, updateCustomerDto);
 
-    return this.findOne(id);
+    return this.customerRepository.save(customer);
   }
 
-  async delete(id: number) {
+  async delete(id: number): Promise<UpdateResult> {
     return this.customerRepository.softDelete(id);
   }
 
