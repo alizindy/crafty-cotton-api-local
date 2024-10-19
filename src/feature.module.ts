@@ -7,6 +7,7 @@ import { CustomersModule } from './customers/customers.module';
 import { StaffRolesModule } from './staff-roles/staff-roles.module';
 import { CreatorsPublicModule } from './creators-public/creators-public.module';
 import { VariantTypesModule } from './variant-types/variant-types.module';
+import { VariantOptionsModule } from './variant-options/variant-options.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { VariantTypesModule } from './variant-types/variant-types.module';
     CreatorsPublicModule,
     CustomersModule,
     StaffRolesModule,
-    VariantTypesModule
+    VariantTypesModule,
+    VariantOptionsModule
   ],
 })
 export class FeatureModule {}
