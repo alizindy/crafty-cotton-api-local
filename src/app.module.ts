@@ -8,6 +8,8 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { VariantOptionsController } from './variant-options/variant-options.controller';
+import { VariantOptionsModule } from './variant-options/variant-options.module';
 
 @Module({
   imports: [
