@@ -1,6 +1,7 @@
 import { AppBaseEntity } from "@/common/entities/app-base.entity";
+import { Creator } from "@/creators/entities/creator.entity";
 import { ApiProperty } from "@nestjs/swagger";
-import { Entity, Column, BeforeInsert } from "typeorm";
+import { Entity, Column, BeforeInsert, ManyToOne } from "typeorm";
 
 @Entity()
 export class ProductCollection extends AppBaseEntity {
@@ -31,6 +32,9 @@ export class ProductCollection extends AppBaseEntity {
   })
   @Column({ type: "text", nullable: true })
   description: string;
+
+  @ManyToOne(() => Creator, (creator) => creator.products)
+  creator: Creator;
 
   @BeforeInsert()
   normalizeSlug() {
