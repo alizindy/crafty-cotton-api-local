@@ -1,7 +1,8 @@
-import { AppBaseEntity } from "@/common/entities/app-base.entity";
-import { ProductProductCollection } from "@/product-product-collections/entities/product-product-collection.entity";
-import { ApiProperty } from "@nestjs/swagger";
-import { Entity, Column, BeforeInsert, OneToMany } from "typeorm";
+import { AppBaseEntity } from '@/common/entities/app-base.entity';
+import { Creator } from '@/creators/entities/creator.entity';
+import { ProductProductCollection } from '@/product-product-collections/entities/product-product-collection.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { Entity, Column, BeforeInsert, OneToMany, ManyToOne } from 'typeorm';
 
 @Entity()
 export class ProductCollection extends AppBaseEntity {
@@ -11,33 +12,39 @@ export class ProductCollection extends AppBaseEntity {
   }
 
   @ApiProperty({
-    example: "summer-collection",
-    description: "Unique slug for the product collection",
+    example: 'summer-collection',
+    description: 'Unique slug for the product collection',
   })
   @Column()
   slug: string;
 
   @ApiProperty({
-    example: "Summer Collection",
-    description: "Name of the product collection",
+    example: 'Summer Collection',
+    description: 'Name of the product collection',
   })
   @Column()
   name: string;
 
   @ApiProperty({
     example:
-      "A curated selection of products for the summer season, featuring lightweight fabrics and bright colors.",
+      'A curated selection of products for the summer season, featuring lightweight fabrics and bright colors.',
     description:
-      "Detailed description of the product collection, including key features and the theme of the collection.",
+      'Detailed description of the product collection, including key features and the theme of the collection.',
   })
-  @Column({ type: "text", nullable: true })
+  @Column({ type: 'text', nullable: true })
   description: string;
 
-  @OneToMany(() => ProductProductCollection, (productProductCollections) => productProductCollections.productCollection)
+  @ManyToOne(() => Creator, (creator) => creator.products)
+  creator: Creator;
+
+  @OneToMany(
+    () => ProductProductCollection,
+    (productProductCollections) => productProductCollections.productCollection,
+  )
   productProductCollections: ProductProductCollection[];
 
   @BeforeInsert()
   normalizeSlug() {
-    this.slug = this.slug.toLowerCase().replace(/\s+/g, "-");
+    this.slug = this.slug.toLowerCase().replace(/\s+/g, '-');
   }
 }

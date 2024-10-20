@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateProductDto {
   @ApiProperty({
@@ -19,4 +19,8 @@ export class CreateProductDto {
   @IsNotEmpty()
   @Transform(({ value }) => value.toLowerCase())
   slug: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  creatorId: number;
 }

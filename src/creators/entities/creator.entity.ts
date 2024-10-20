@@ -1,7 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '@/users/entities/user.entity';
-import { Column, Entity, OneToOne, JoinColumn, BeforeInsert } from 'typeorm';
+import { Column, Entity, OneToOne, JoinColumn, BeforeInsert, OneToMany } from 'typeorm';
 import { AppBaseEntity } from '@/common/entities/app-base.entity';
+import { Product } from '@/products/entities/product.entity';
+import { ProductCollection } from '@/product-collections/entities/product-collection.entity';
 
 @Entity()
 export class Creator extends AppBaseEntity {
@@ -67,6 +69,12 @@ export class Creator extends AppBaseEntity {
   @OneToOne(() => User, (user) => user.creator)
   @JoinColumn()
   user: User;
+
+  @OneToMany(() => Product, (products) => products.creator)
+  products: Product[];
+
+  @OneToMany(() => ProductCollection, (productCollections) => productCollections.creator)
+  productCollections: ProductCollection[];
 
   @BeforeInsert()
   normalizeSlug() {
