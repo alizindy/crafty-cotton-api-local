@@ -53,6 +53,6 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/app  # Make sure this points to where docker-compose.yml is located
+            cd /home/ubuntu/app
             docker-compose down
             docker-compose up -d --build

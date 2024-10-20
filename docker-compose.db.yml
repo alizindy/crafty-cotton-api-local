@@ -1,0 +1,21 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:13
+    container_name: crafty-cotton-pg-db
+    ports:
+      - '20000:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: cc_local_api
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - crafty-cotton-api
+
+networks:
+  crafty-cotton-api:
+
+volumes:
+  postgres_data:
