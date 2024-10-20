@@ -56,12 +56,10 @@ jobs:
             cd /home/ubuntu/app
 
             docker-compose down
-
-            docker stop $(docker ps -q)
-            docker rm $(docker ps -a -q)
-            docker rmi $(docker images -a -q)
+            docker stop $(docker ps --filter "ancestor=crafty-cotton-api" -q)
+            docker rm $(docker ps -a --filter "ancestor=crafty-cotton-api" -q)
+            docker image prune -f
             docker volume prune -f
-            docker network prune -f
             
             ENV_FILE='.env.develop' COMMAND='yarn start:dev' docker-compose -f docker-compose-ubuntu.yml up -d
       

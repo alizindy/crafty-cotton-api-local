@@ -1,39 +1,77 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager, UpdateResult } from 'typeorm';
+import { User, UserRole } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    const newUser = this.userRepository.create(createUserDto);
+  async createUserWithTransaction(
+    manager: EntityManager,
+    createUserDto: CreateUserDto,
+    role: UserRole,
+  ): Promise<User> {
+    const { email, password } = createUserDto;
 
-    return this.userRepository.save(newUser);
+    const userExisted: User = await manager.findOne(User, {
+      where: { email, role },
+    });
+
+    if (userExisted) {
+      throw new Error('Email has been used');
+    }
+
+    const hashedPassword = await this.hashPassword(password);
+
+    const user = manager.create(User, {
+      email,
+      password: hashedPassword,
+      role,
+      isActive: true,
+    });
+
+    // Save the user entity
+    const savedUser = await manager.save(User, user);
+
+    // Delete password before returning the saved user
+    delete savedUser.password;
+    return savedUser;
   }
 
-  findAll() {
+  async findAll(): Promise<User[]> {
     return this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return this.userRepository.findOneBy({ id });
+  async findOneById(id: number): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new Error(`User with ID ${id} not found`);
+    }
+    return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.findOne(id);
-
-    return this.userRepository.save({ ...user, ...updateUserDto });
+  async findByEmail(email: string): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { email } });
   }
 
-  async remove(id: number) {
-    const user = await this.findOne(id);
+  async deleteUser(id: number): Promise<UpdateResult> {
+    return await this.userRepository.softDelete(id);
+  }
 
-    return this.userRepository.remove(user);
+  async hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 10); // Define the salt rounds in a config if needed
+  }
+
+  async validatePassword(
+    inputPassword: string,
+    storedPassword: string,
+  ): Promise<boolean> {
+    return bcrypt.compare(inputPassword, storedPassword);
   }
 }
