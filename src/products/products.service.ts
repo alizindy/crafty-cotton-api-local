@@ -1,15 +1,15 @@
-import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, UpdateResult } from "typeorm";
-import { CreateProductDto } from "./dto/create-product.dto";
-import { UpdateProductDto } from "./dto/update-product.dto";
-import { Product } from "./entities/product.entity";
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, UpdateResult } from 'typeorm';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { Product } from './entities/product.entity';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
-    private readonly productRepository: Repository<Product>
+    private readonly productRepository: Repository<Product>,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -19,7 +19,7 @@ export class ProductsService {
 
     if (existingProduct) {
       throw new Error(
-        `Product with slug "${createProductDto.slug}" already exists`
+        `Product with slug "${createProductDto.slug}" already exists`,
       );
     }
 
@@ -28,12 +28,15 @@ export class ProductsService {
   }
 
   async findAll(): Promise<Product[]> {
-    return this.productRepository.find();
+    return this.productRepository.find({
+      relations: ['productProductCollections', 'productVariants'],
+    });
   }
 
   async findOne(id: number): Promise<Product> {
     const product = await this.productRepository.findOne({
       where: { id },
+      relations: ['productProductCollections', 'productVariants'],
     });
     if (!product) {
       throw new Error(`Product with ID ${id} not found`);
@@ -43,7 +46,7 @@ export class ProductsService {
 
   async update(
     id: number,
-    updateProductDto: UpdateProductDto
+    updateProductDto: UpdateProductDto,
   ): Promise<Product> {
     const product = await this.findOne(id);
 

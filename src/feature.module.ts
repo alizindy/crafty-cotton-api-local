@@ -10,6 +10,8 @@ import { VariantTypesModule } from './variant-types/variant-types.module';
 import { VariantOptionsModule } from './variant-options/variant-options.module';
 import { ProductsModule } from './products/products.module';
 import { ProductCollectionsModule } from './product-collections/product-collections.module';
+import { ProductVariantsModule } from './product-variants/product-variants.module';
+import { ProductProductCollectionsModule } from './product-product-collections/product-product-collections.module';
 
 @Module({
   imports: [
@@ -22,7 +24,9 @@ import { ProductCollectionsModule } from './product-collections/product-collecti
     VariantTypesModule,
     VariantOptionsModule,
     ProductsModule,
-    ProductCollectionsModule
+    ProductCollectionsModule,
+    ProductVariantsModule,
+    ProductProductCollectionsModule
   ],
 })
 export class FeatureModule {}

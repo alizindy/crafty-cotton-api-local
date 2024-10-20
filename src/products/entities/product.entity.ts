@@ -1,7 +1,9 @@
 import { AppBaseEntity } from '@/common/entities/app-base.entity';
 import { Creator } from '@/creators/entities/creator.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { BeforeInsert, Column, Entity, ManyToOne } from 'typeorm';
+import { BeforeInsert, Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { ProductVariant } from '@/product-variants/entities/product-variant.entity';
+import { ProductProductCollection } from '@/product-product-collections/entities/product-product-collection.entity';
 
 export enum ProductStatus {
   DRAFT = 'draft',
@@ -43,6 +45,15 @@ export class Product extends AppBaseEntity {
 
   @ManyToOne(() => Creator, (creator) => creator.products)
   creator: Creator;
+
+  @OneToMany(() => ProductVariant, (productVariant) => productVariant.product)
+  productVariants: ProductVariant[];
+
+  @OneToMany(
+    () => ProductProductCollection,
+    (productProductCollections) => productProductCollections.product,
+  )
+  productProductCollections: ProductProductCollection[];
 
   @BeforeInsert()
   normalizeSlug() {
