@@ -1,6 +1,7 @@
 import { AppBaseEntity } from "@/common/entities/app-base.entity";
+import { ProductProductCollection } from "@/product-product-collections/entities/product-product-collection.entity";
 import { ApiProperty } from "@nestjs/swagger";
-import { Entity, Column, BeforeInsert } from "typeorm";
+import { Entity, Column, BeforeInsert, OneToMany } from "typeorm";
 
 @Entity()
 export class ProductCollection extends AppBaseEntity {
@@ -31,6 +32,9 @@ export class ProductCollection extends AppBaseEntity {
   })
   @Column({ type: "text", nullable: true })
   description: string;
+
+  @OneToMany(() => ProductProductCollection, (productProductCollections) => productProductCollections.productCollection)
+  productProductCollections: ProductProductCollection[];
 
   @BeforeInsert()
   normalizeSlug() {

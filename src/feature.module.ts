@@ -11,6 +11,7 @@ import { VariantOptionsModule } from './variant-options/variant-options.module';
 import { ProductsModule } from './products/products.module';
 import { ProductCollectionsModule } from './product-collections/product-collections.module';
 import { ProductVariantsModule } from './product-variants/product-variants.module';
+import { ProductProductCollectionsModule } from './product-product-collections/product-product-collections.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ProductVariantsModule } from './product-variants/product-variants.modul
     ProductsModule,
     ProductCollectionsModule,
     ProductVariantsModule,
+    ProductProductCollectionsModule
   ],
 })
 export class FeatureModule {}
