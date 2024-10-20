@@ -9,6 +9,7 @@ import { CreatorsPublicModule } from './creators-public/creators-public.module';
 import { VariantTypesModule } from './variant-types/variant-types.module';
 import { VariantOptionsModule } from './variant-options/variant-options.module';
 import { ProductsModule } from './products/products.module';
+import { ProductCollectionsModule } from './product-collections/product-collections.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { ProductsModule } from './products/products.module';
     StaffRolesModule,
     VariantTypesModule,
     VariantOptionsModule,
-    ProductsModule
+    ProductsModule,
+    ProductCollectionsModule
   ],
 })
 export class FeatureModule {}
