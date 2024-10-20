@@ -1,0 +1,82 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - cicd-pipeline-testing
+  pull_request:
+    branches:
+      - cicd-pipeline-testing
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t crafty-cotton-api:latest -f Dockerfile.local .
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Copy project files to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ec2-52-221-234-42.ap-southeast-1.compute.amazonaws.com
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "."
+          target: "/home/ubuntu/crafty-cotton-api"  # Update to your target path on EC2
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ec2-52-221-234-42.ap-southeast-1.compute.amazonaws.com
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/crafty-cotton-api
+
+            docker stop $(docker ps --filter "ancestor=crafty-cotton-api" -q)
+            docker rm $(docker ps -a --filter "ancestor=crafty-cotton-api" -q)
+            docker image prune -f
+            docker volume prune -f
+            
+            ENV_FILE='.env.develop' COMMAND='yarn start:dev' docker-compose -f docker-compose-ubuntu.yml up -d
+      
+            container_db_id=$(docker ps --filter "ancestor=postgres:13" --format "{{.ID}}")
+            if [ -n "$container_db_id" ]; then
+              echo "Postgres container ID: $container_db_id"
+              docker exec -i $container_db_id sh -c "
+              psql -U postgres -tc \"SELECT 1 FROM pg_database WHERE datname = 'cc_local_api'\" | grep -q 1 || psql -U postgres -c 'CREATE DATABASE cc_local_api'"
+            else
+              echo "No container found for 'postgres'"
+              exit 1
+            fi
+
+            container_id=$(docker ps --filter "ancestor=crafty-cotton-api" --format "{{.ID}}")
+            if [ -n "$container_id" ]; then
+              echo "Crafty Cotton API container ID: $container_id"
+              docker exec -i $container_id sh -c "yarn typeorm migration:run"
+            else
+              echo "No container found for 'crafty-cotton-api'"
+              exit 1
+            fi
