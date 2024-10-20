@@ -12,10 +12,13 @@ export class ProductCollectionsService {
     private readonly productCollectionRepository: Repository<ProductCollection>
   ) {}
 
-  async create(createProductCollectionDto: CreateProductCollectionDto): Promise<ProductCollection> {
-    const existingProductCollection = await this.productCollectionRepository.findOne({
-      where: { slug: createProductCollectionDto.slug },
-    });
+  async create(
+    createProductCollectionDto: CreateProductCollectionDto
+  ): Promise<ProductCollection> {
+    const existingProductCollection =
+      await this.productCollectionRepository.findOne({
+        where: { slug: createProductCollectionDto.slug },
+      });
 
     if (existingProductCollection) {
       throw new Error(
@@ -23,17 +26,22 @@ export class ProductCollectionsService {
       );
     }
 
-    const productCollection = this.productCollectionRepository.create(createProductCollectionDto);
+    const productCollection = this.productCollectionRepository.create(
+      createProductCollectionDto
+    );
     return this.productCollectionRepository.save(productCollection);
   }
 
   async findAll(): Promise<ProductCollection[]> {
-    return this.productCollectionRepository.find();
+    return this.productCollectionRepository.find({
+      relations: ["productProductCollections"],
+    });
   }
 
   async findOne(id: number): Promise<ProductCollection> {
     const productCollection = await this.productCollectionRepository.findOne({
       where: { id },
+      relations: ["productProductCollections"],
     });
     if (!productCollection) {
       throw new Error(`Product Collection with ID ${id} not found`);
