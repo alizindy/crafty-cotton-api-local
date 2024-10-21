@@ -10,6 +10,11 @@ COPY .env ./
 RUN yarn install
 RUN yarn add @nestjs/axios
 RUN yarn add @nestjs/schedule
+RUN yarn add @nestjs/swagger
+RUN yarn add class-validator
+RUN yarn add @nestjs/jwt
+RUN yarn add @nestjs/passport
+RUN yarn add class-validator
 COPY . .
 RUN yarn build
 
