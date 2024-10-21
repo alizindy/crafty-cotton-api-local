@@ -67,6 +67,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu/app
+            yarn install
 
             # Stop and remove the containers related to the 'crafty-cotton-api' image
             docker stop $(docker ps --filter "ancestor=crafty-cotton-api" -q)
