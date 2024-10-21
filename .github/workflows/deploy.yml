@@ -41,7 +41,7 @@ jobs:
       - name: Copy project files to EC2
         uses: appleboy/scp-action@master
         with:
-          host: ec2-52-221-234-42.ap-southeast-1.compute.amazonaws.com
+          host: ec2-54-169-71-82.ap-southeast-1.compute.amazonaws.com
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "."
@@ -50,7 +50,7 @@ jobs:
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
-          host: ec2-52-221-234-42.ap-southeast-1.compute.amazonaws.com
+          host: ec2-54-169-71-82.ap-southeast-1.compute.amazonaws.com
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
