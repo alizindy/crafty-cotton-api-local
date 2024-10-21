@@ -87,5 +87,5 @@ jobs:
             fi
 
             # Restart the application for ensure the changes are applied
-            docker stop $(docker ps --filter "ancestor=crafty-cotton-api" -q)
-            docker start $(docker ps --filter "ancestor=crafty-cotton-api" -q)
+            docker stop $container_id
+            docker start $container_id
