@@ -27,7 +27,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t crafty-cotton-api:latest -f Dockerfile.local .
+          docker build --no-cache -t crafty-cotton-api:latest -f Dockerfile.local .
 
   deploy:
     runs-on: ubuntu-latest
