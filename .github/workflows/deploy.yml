@@ -44,7 +44,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "."
-          target: "/home/ubuntu/app"  # Update to your target path on EC2
+          target: "/home/ubuntu/app"
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
@@ -55,7 +55,6 @@ jobs:
           script: |
             cd /home/ubuntu/app
 
-            docker-compose down
             docker stop $(docker ps --filter "ancestor=crafty-cotton-api" -q)
             docker rm $(docker ps -a --filter "ancestor=crafty-cotton-api" -q)
             docker image prune -f
@@ -81,4 +80,3 @@ jobs:
               echo "No container found for 'crafty-cotton-api'"
               exit 1
             fi
-            
