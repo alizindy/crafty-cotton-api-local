@@ -80,6 +80,7 @@ jobs:
             container_id=$(docker ps --filter "ancestor=crafty-cotton-api" --format "{{.ID}}")
             if [ -n "$container_id" ]; then
               echo "Crafty Cotton API container ID: $container_id"
+              docker exec -i $container_id sh -c "yarn install"
               docker exec -i $container_id sh -c "yarn typeorm migration:run"
             else
               echo "No container found for 'crafty-cotton-api'"
