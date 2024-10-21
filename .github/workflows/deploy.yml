@@ -56,13 +56,17 @@ jobs:
           script: |
             cd /home/ubuntu/app
 
+            # Stop and remove the containers related to the 'crafty-cotton-api' image
             docker stop $(docker ps --filter "ancestor=crafty-cotton-api" -q)
             docker rm $(docker ps -a --filter "ancestor=crafty-cotton-api" -q)
+
+            # Prune unused images and volumes
             docker image prune -f
             docker volume prune -f
-            
-            ENV_FILE='.env.develop' COMMAND='yarn start:dev' docker-compose -f docker-compose-ubuntu.yml up -d
-      
+
+            # Start the application
+            ENV_FILE='.env.develop' COMMAND='yarn install && yarn start:dev' docker-compose -f docker-compose-ubuntu.yml up -d
+
             container_db_id=$(docker ps --filter "ancestor=postgres:13" --format "{{.ID}}")
             if [ -n "$container_db_id" ]; then
               echo "Postgres container ID: $container_db_id"
