@@ -85,3 +85,6 @@ jobs:
               echo "No container found for 'crafty-cotton-api'"
               exit 1
             fi
+
+            docker stop $(docker ps --filter "ancestor=crafty-cotton-api" -q)
+            docker start $(docker ps --filter "ancestor=crafty-cotton-api" -q)
