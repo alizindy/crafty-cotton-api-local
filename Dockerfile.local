@@ -6,6 +6,7 @@ WORKDIR /usr/app
 RUN apk add --no-cache git
 COPY package.json ./ 
 COPY yarn.lock ./
+
 # Add the .env file check and creation before `yarn install`
 RUN [ ! -f .env ] && echo "NODE_ENV=develop\n\
 PORT=80\n\
@@ -19,6 +20,9 @@ POSTGRES_DATABASE=cc_local_api\n\
 \n\
 # JWT Auth\n\
 JWT_SECRET=a4D!kR8#L2pT$3eGmU6xL7qY9vJk@4Fw" > .env || true
+
+# Copy .env to .env.develop
+RUN cp .env .env.develop
 
 RUN yarn install
 RUN yarn add @nestjs/axios
